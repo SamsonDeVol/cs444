@@ -2,7 +2,7 @@
 // basic multithreading program using POSIX library
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <assert.h>
 #include <pthread.h>
 
 void *run(void *arg){
@@ -21,18 +21,18 @@ int main(void) {
     printf("Launching threads\n");
 
     // initialize threads
-    pthread_t t1;
-    pthread_t t2;
-
+    pthread_t t1, t2;
+    int status;
     // create the threads with appropriate thread names
-    pthread_create(&t1, NULL, run, "thread 1");
-    pthread_create(&t2, NULL, run, "thread 2");
+    status = pthread_create(&t1, NULL, run, "thread 1"); assert(status == 0);
+    status = pthread_create(&t2, NULL, run, "thread 2");
 
     // wait for each thread to complete
-    pthread_join(t1, NULL);
-    pthread_join(t2, NULL);
+    status = pthread_join(t1, NULL); assert(status == 0);
+    status = pthread_join(t2, NULL); assert(status == 0);
 
     // all threads complete, close main thread
     printf("Threads complete!\n");
 
+    return 0;
 }
