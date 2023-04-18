@@ -14,42 +14,45 @@ int transaction_count;
 
 int seat_taken_count = 0;
 
-int reserve_seat(int n)
-{
-    // Attempt to reserve seat number n
-    //
-    // If the seat is already taken, return -1
-    // Otherwise mark the seat as taken and return 0
-    //
-    // This function should also increment seat_taken_count if the seat
-    // wasn't already taken.
-    
-    // TODO
-
-    return 0;  // Change as necessary--included so it will build
-}
-
-int free_seat(int n)
-{
-    // Attempt to free (unreserve) seat number n
-    //
-    // If the seat is already free, return -1
-    // Otherwise mark the seat as free and return 0
-    //
-    // This function should also decrement seat_taken_count if the seat
-    // wasn't already free.
-
-    // TODO
-
-    return 0;  // Change as necessary--included so it will build
-}
+pthread_mutex_t lock_mutex = PTHREAD_MUTEX_INITIALIZER; // mutex lock
 
 int is_free(int n) {
     // Returns true if the given seat is available.
+    if (seat_taken[n]){
+        return 0;
+    } else {
+        return -1;
+    }
+}
 
-    // TODO
+int reserve_seat(int n) {
+    // returns 0 if seat is avaliable, -1 if not
+    pthread_mutex_lock(&lock_mutex);
 
-    return 0;  // Change as necessary--included so it will build
+    if (is_free(n) == 0){
+        seat_taken[n] = 1;
+        seat_taken_count++;
+        pthread_mutex_unlock(&lock_mutex);
+        return 0;
+    }
+
+    pthread_mutex_unlock(&lock_mutex);
+    return -1;
+}
+
+int free_seat(int n) {
+    // returns 0 if seat returnable, -1 if not
+    pthread_mutex_lock(&lock_mutex);
+
+    if (is_free(n) == 0){
+        seat_taken[n] = 0;
+        seat_taken_count--;
+        pthread_mutex_unlock(&lock_mutex);
+        return 0;
+    }
+    
+    pthread_mutex_unlock(&lock_mutex);
+    return -1;
 }
 
 int verify_seat_count(void) {
@@ -69,7 +72,6 @@ int verify_seat_count(void) {
     for (int i = 0; i < seat_count; i++)
         if (seat_taken[i])
             count++;
-
     // Return true if it's the same as seat_taken_count
     return count == seat_taken_count;
 }
@@ -81,7 +83,7 @@ void *seat_broker(void *arg)
     int *id = arg;
 
     for (int i = 0; i < transaction_count; i++) {
-        int seat = rand() % seat_count;
+        int seat = rand() % seat_count; 
         if (rand() & 1) {
             // buy a random seat
             reserve_seat(seat);
