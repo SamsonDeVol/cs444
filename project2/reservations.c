@@ -18,11 +18,7 @@ pthread_mutex_t lock_mutex = PTHREAD_MUTEX_INITIALIZER; // mutex lock
 
 int is_free(int n) {
     // Returns true if the given seat is available.
-    if (seat_taken[n]){
-        return 0;
-    } else {
-        return -1;
-    }
+    return !seat_taken[n];
 }
 
 int reserve_seat(int n) {
@@ -44,7 +40,7 @@ int free_seat(int n) {
     // returns 0 if seat returnable, -1 if not
     pthread_mutex_lock(&lock_mutex);
 
-    if (is_free(n) == 0){
+    if (is_free(n) == -1){
         seat_taken[n] = 0;
         seat_taken_count--;
         pthread_mutex_unlock(&lock_mutex);
