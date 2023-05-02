@@ -3,7 +3,7 @@
 
 ### Part 1: Race Conditions
 
-`````````
+```
 0 if x == 12:
 1 	x++;
 ```
